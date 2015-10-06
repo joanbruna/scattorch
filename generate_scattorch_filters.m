@@ -24,7 +24,8 @@ filters=generate_scatt_filters_pyramid(options);
 
 current_order = zeros(inplanes,1);
 nstates(1)=inplanes;
-lpatten=8*sqrt(2);
+l0=2;
+lpatten=l0*sqrt(2);
 
 for j=1:options.J
 
@@ -60,27 +61,41 @@ current_order = new_order;
 clear W;
 end
 
+%generate the lowpass filters 
+for j=1:options.J
+rast=1;
+for r=1:nstates(1)
+if j==1
+W(r, :, :, r) = filters.h0/l0;
+else
+W(r, :, :, r) = filters.h/l0;
+end
+end
+eval(['lpweights',num2str(j),'=','permute(W,[2,3,1,4]);']);
+clear W;
+end
+
+
    %self.info = torch.load('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '.th' )
 matfile = sprintf('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_inplanes_%d_scale_%d.mat',inplanes, scale);
 torchfile = sprintf('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_inplanes_%d_scale_%d.th',inplanes, scale);
 
-nstates
 
 if scale==4
-save(matfile,'weights1','weights2', 'weights3', 'weights4','nstates','width','downs','-v7.3');
+save(matfile,'lpweights1','lpweights2', 'lpweights3', 'lpweights4','weights1','weights2', 'weights3', 'weights4','nstates','width','downs','-v7.3');
 elseif scale==3
-save(matfile,'weights1','weights2', 'weights3', 'nstates','width','downs','-v7.3');
+save(matfile,'lpweights1','lpweights2', 'lpweights3','weights1','weights2', 'weights3', 'nstates','width','downs','-v7.3');
 
 elseif scale==2
-save(matfile,'weights1','weights2', 'nstates','width','downs','-v7.3');
+save(matfile,'lpweights1','lpweights2','weights1','weights2', 'nstates','width','downs','-v7.3');
 
 elseif scale==1
-save(matfile,'weights1','nstates','width','downs','-v7.3');
+save(matfile,'lpweights1','weights1','nstates','width','downs','-v7.3');
 
 else
 error('to do')
 end
 
-unix(sprintf('th /home/bruna/projects/inv/th/translate_scattfilters.lua -input %s -output %s',matfile, torchfile));
+unix(sprintf('th /home/bruna/projects/scattorch/translate_scattfilters.lua -input %s -output %s',matfile, torchfile));
   
 
