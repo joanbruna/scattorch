@@ -1,9 +1,8 @@
-local scatteringMM, parent = torch.class('nn.scatteringMM', 'nn.Module')
+local scatteringtuneMM, parent = torch.class('nn.scatteringtuneMM', 'nn.Module')
 
-function scatteringMM:__init(nInputPlane, scale)
+function scatteringtuneMM:__init(nInputPlane, scale)
    parent.__init(self)
    
-
    self.nInputPlane = nInputPlane
 
    self.padding = padding or 0
@@ -89,14 +88,37 @@ function scatteringMM:__init(nInputPlane, scale)
 
 end
 
-function scatteringMM:updateOutput(input)
+local function makeContiguous(self, input, gradOutput)
+   if not input:isContiguous() then
+      self._input = self._input or input.new()
+      self._input:resizeAs(input):copy(input)
+      input = self._input
+   end
+   if gradOutput then
+      if not gradOutput:isContiguous() then
+     self._gradOutput = self._gradOutput or gradOutput.new()
+     self._gradOutput:resizeAs(gradOutput):copy(gradOutput)
+     gradOutput = self._gradOutput
+      end
+   end
+   return input, gradOutput
+end
+
+function scatteringtuneMM:updateOutput(input)
+      input = makeContiguous(self, input)
       self.output = self.all:updateOutput(input)
       return self.output
 end
 
-function scatteringMM:updateGradInput(input, gradOutput)
+function scatteringtuneMM:updateGradInput(input, gradOutput)
+   if self.gradInput then
+      input, gradOutput = makeContiguous(self, input, gradOutput)
     self.gradInput = self.all:updateGradInput(input, gradOutput)
     return self.gradInput
+   end
 end
 
-
+function scatteringtuneMM:accGradParameters(input, gradOutput, scale)
+   input, gradOutput = makeContiguous(self, input, gradOutput)
+   return self.all:accGradParameters(self, input, gradOutput, scale)
+end
