@@ -12,6 +12,8 @@ options.precision='double';
 
 options
 
+addpath('/home/bruna/matlab/toolbox/synthesis/rotosynthesis');
+
 filters=generate_scatt_filters_pyramid(options);
 
 %we need to write the fields
@@ -21,6 +23,9 @@ filters=generate_scatt_filters_pyramid(options);
 %	downs
 
 %there is one filter-bank per scale. all the paths are regrouped into a single convolutional tensor. 
+
+filters.identity = 0*filters.h;
+filters.identity(ceil(size(filters.identity,1)/2), ceil(size(filters.identity,2)/2))=1;
 
 current_order = zeros(inplanes,1);
 nstates(1)=inplanes;
@@ -47,8 +52,8 @@ for r=1:nstates(j)
 	W(r,:,:,rast) = filters.h0/lpatten; rast=rast+1;
 	W(r,:,:,rast) = filters.h0/lpatten; 
 	else
-	W(r,:,:,rast) = filters.h/lpatten; rast=rast+1;
-	W(r,:,:,rast) = filters.h/lpatten; 
+	W(r,:,:,rast) = filters.identity/lpatten; rast=rast+1;
+	W(r,:,:,rast) = filters.identity/lpatten; 
 	end
 	new_order(round(rast/2)) = current_order(r);rast=rast+1;
 end
@@ -68,12 +73,16 @@ for r=1:nstates(1)
 if j==1
 W(r, :, :, r) = filters.h0/l0;
 else
-W(r, :, :, r) = filters.h/l0;
+W(r, :, :, r) = filters.identity/l0;
 end
 end
 eval(['lpweights',num2str(j),'=','permute(W,[2,3,1,4]);']);
 clear W;
 end
+
+downfilters = filters.h(4:end-3,4:end-3);
+downfilters = 2*downfilters/sum(downfilters(:));
+save('/misc/vlgscratch2/LecunGroup/bruna/scattorch/downsampling_filter.mat','downfilters');
 
 
    %self.info = torch.load('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '.th' )

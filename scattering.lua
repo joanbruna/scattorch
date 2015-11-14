@@ -15,36 +15,45 @@ function scatteringMM:__init(nInputPlane, scale)
 	--main branch: scattering
 	----------
    self.scatt = nn.Sequential()
+	local scalingfact = 2^(2*self.scale-1)
 
 	-- attention: I am not doing any smoothing after the modulus. the filters are not exactly the same TODO check the impact 
 	-- of this simplification 
    for i=1,self.scale do
-      self.scatt:add(nn.SpatialConvolutionMM(self.info.nstates[i], 2*self.info.nstates[i+1], self.info.width[i], self.info.width[i], self.info.downs[i], self.info.downs[i]))
+      self.scatt:add(nn.SpatialConvolutionMM(self.info.nstates[i], 2*self.info.nstates[i+1], self.info.width[i], self.info.width[i]))
       self.scatt:add(nn.FeaturePooling(2,2))
+      if i > 1 then
+	self.scatt:add(nn.scattDownsampling(self.info.nstates[i+1]))
+      end
    end
    --add normalization by a simple constant factor (TODO improve)
-   self.scatt:add(nn.Mul())
+   self.scatt:add(nn.AMul(scalingfact))
 
-   for i=1,self.scale do
-      self.scatt.modules[1+2*(i-1)].weight = self.info.weights[i]:clone()
-      self.scatt.modules[1+2*(i-1)].bias:fill(0)
+	self.scatt.modules[1].weight = self.info.weights[1]:clone()
+	self.scatt.modules[1].bias:fill(0)
+
+   for i=2,self.scale do
+      self.scatt.modules[3*(i-1)].weight = self.info.weights[i]:clone()
+      self.scatt.modules[3*(i-1)].bias:fill(0)
    end 
-	local scalingfact = torch.Tensor(1):fill(2^(2*self.scale-1))
-	self.scatt.modules[1+2*self.scale].weight = scalingfact;   
    
 	----------------
 	-- add the lowpass in a separate branch
 	-- ---------------
   	self.lpass = nn.Sequential()
   	for i=1,self.scale do
-	self.lpass:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i], self.info.width[i], self.info.downs[i], self.info.downs[i]))
+	self.lpass:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i], self.info.width[i]))
+	if i >1 then
+	self.lpass:add(nn.scattDownsampling(self.info.nstates[1]))
 	end
-	self.lpass:add(nn.Mul())
-  	for i=1,self.scale do
-	self.lpass.modules[i].weight = self.info.lpweights[i]:clone()
-	self.lpass.modules[i].bias:fill(0)
 	end
-	self.lpass.modules[self.scale+1].weight = scalingfact;
+	self.lpass:add(nn.AMul(scalingfact))
+	self.lpass.modules[1].weight = self.info.lpweights[1]:clone()
+	self.lpass.modules[1].bias:fill(0)
+  	for i=2,self.scale do
+	self.lpass.modules[2*(i-1)].weight = self.info.lpweights[i]:clone()
+	self.lpass.modules[2*(i-1)].bias:fill(0)
+	end
 
 	---- -------
 	-- add the TV branch (finest Haar scale)
@@ -53,9 +62,10 @@ function scatteringMM:__init(nInputPlane, scale)
 	self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], 2*self.info.nstates[1], self.info.width[1], self.info.width[1]))
 	self.haar:add(nn.FeaturePooling(2,2))
 	for i=2,self.scale do
-		self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i], self.info.width[i], self.info.downs[i], self.info.downs[i]))
+		self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i], self.info.width[i]))
+		self.haar:add(nn.scattDownsampling(self.info.nstates[1]))
 	end
-	self.haar:add(nn.Mul())
+	self.haar:add(nn.AMul(scalingfact))
 
 	--define the haar filters implementing the TV
 	local zz = self.info.width[1]*self.info.width[1]
@@ -70,10 +80,9 @@ function scatteringMM:__init(nInputPlane, scale)
 	self.haar.modules[1].weight = ker1:clone()
 	self.haar.modules[1].bias:fill(0)
 	for i=2,self.scale do
-		self.haar.modules[i+1].weight = self.info.lpweights[i]:clone()
-		self.haar.modules[i+1].bias:fill(0)
+		self.haar.modules[2*i-1].weight = self.info.lpweights[i]:clone()
+		self.haar.modules[2*i-1].bias:fill(0)
 	end
-	self.haar.modules[self.scale+2].weight = scalingfact;
 
 	--------------------------
 	--join everything together
