@@ -1,3 +1,7 @@
+--require 'AMul'
+--require 'scattDownsampling'
+--require 'FeaturePooling'
+
 local scatteringMM, parent = torch.class('nn.scatteringMM', 'nn.Module')
 
 function scatteringMM:__init(nInputPlane, scale)
@@ -8,6 +12,7 @@ function scatteringMM:__init(nInputPlane, scale)
 
    self.padding = padding or 0
    self.scale = scale
+   self.pad = 0
 
    self.info = torch.load('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '.th' )
 
@@ -20,7 +25,7 @@ function scatteringMM:__init(nInputPlane, scale)
 	-- attention: I am not doing any smoothing after the modulus. the filters are not exactly the same TODO check the impact 
 	-- of this simplification 
    for i=1,self.scale do
-      self.scatt:add(nn.SpatialConvolutionMM(self.info.nstates[i], 2*self.info.nstates[i+1], self.info.width[i], self.info.width[i]))
+      self.scatt:add(nn.SpatialConvolutionMM(self.info.nstates[i], 2*self.info.nstates[i+1], self.info.width[i], self.info.width[i],1,1,self.pad,self.pad))
       self.scatt:add(nn.FeaturePooling(2,2))
       if i > 1 then
 	self.scatt:add(nn.scattDownsampling(self.info.nstates[i+1]))
@@ -42,7 +47,7 @@ function scatteringMM:__init(nInputPlane, scale)
 	-- ---------------
   	self.lpass = nn.Sequential()
   	for i=1,self.scale do
-	self.lpass:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i], self.info.width[i]))
+	self.lpass:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i], self.info.width[i],1,1,self.pad,self.pad))
 	if i >1 then
 	self.lpass:add(nn.scattDownsampling(self.info.nstates[1]))
 	end
@@ -59,10 +64,10 @@ function scatteringMM:__init(nInputPlane, scale)
 	-- add the TV branch (finest Haar scale)
 	-- -----------
 	self.haar = nn.Sequential()
-	self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], 2*self.info.nstates[1], self.info.width[1], self.info.width[1]))
+	self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], 2*self.info.nstates[1], self.info.width[1], self.info.width[1],1,1,self.pad,self.pad))
 	self.haar:add(nn.FeaturePooling(2,2))
 	for i=2,self.scale do
-		self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i], self.info.width[i]))
+		self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i], self.info.width[i],1,1,self.pad,self.pad))
 		self.haar:add(nn.scattDownsampling(self.info.nstates[1]))
 	end
 	self.haar:add(nn.AMul(scalingfact))

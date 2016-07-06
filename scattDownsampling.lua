@@ -14,7 +14,7 @@ function scattDownsampling:__init(nInputPlane)
 	--main branch: scattering
 	----------
    self.downs = nn.Sequential()
-   self.downs:add(nn.SpatialConvolutionMM(nInputPlane, nInputPlane, self.info.width, self.info.width, 2, 2, 1, 1));
+   self.downs:add(nn.SpatialConvolutionMM(nInputPlane, nInputPlane, self.info.width, self.info.width, 2, 2, self.padding, self.padding));
 
 --  self.downs.modules[1].weight = torch.CudaTensor(nInputPlane, nInputPlance*self.info.width*self.info.width):zero();
 	local zz = self.info.width*self.info.width;

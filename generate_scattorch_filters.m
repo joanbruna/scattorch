@@ -29,7 +29,7 @@ filters.identity(ceil(size(filters.identity,1)/2), ceil(size(filters.identity,2)
 
 current_order = zeros(inplanes,1);
 nstates(1)=inplanes;
-l0=2;
+l0=1;
 lpatten=l0*sqrt(2);
 
 for j=1:options.J
@@ -89,8 +89,13 @@ save('/misc/vlgscratch2/LecunGroup/bruna/scattorch/downsampling_filter.mat','dow
 matfile = sprintf('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_inplanes_%d_scale_%d.mat',inplanes, scale);
 torchfile = sprintf('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_inplanes_%d_scale_%d.th',inplanes, scale);
 
-
-if scale==4
+if scale==7
+save(matfile,'lpweights1','lpweights2', 'lpweights3','lpweights4','lpweights5', 'lpweights6', 'lpweights7','weights1','weights2', 'weights3','weights4','weights5', 'weights6', 'weights7','nstates','width','downs','-v7.3');
+elseif scale==6
+save(matfile,'lpweights1','lpweights2', 'lpweights3','lpweights4','lpweights5', 'lpweights6', 'weights1','weights2', 'weights3','weights4','weights5', 'weights6','nstates','width','downs','-v7.3');
+elseif scale==5
+save(matfile,'lpweights1','lpweights2', 'lpweights3','lpweights4','lpweights5','weights1','weights2', 'weights3','weights4','weights5','nstates','width','downs','-v7.3');
+elseif scale==4
 save(matfile,'lpweights1','lpweights2', 'lpweights3', 'lpweights4','weights1','weights2', 'weights3', 'weights4','nstates','width','downs','-v7.3');
 elseif scale==3
 save(matfile,'lpweights1','lpweights2', 'lpweights3','weights1','weights2', 'weights3', 'nstates','width','downs','-v7.3');
