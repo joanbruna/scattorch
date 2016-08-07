@@ -78,7 +78,7 @@ eval(['lpweights',num2str(j),'=','permute(W,[2,1,3]);']);
 clear W;
 end
 
-downfilters = filters.h(4:end-3);
+downfilters = filters.downfilters;
 downfilters = 2*downfilters/sum(downfilters(:));
 save('/misc/vlgscratch2/LecunGroup/bruna/scattorch/downsampling_1d_filter.mat','downfilters');
 

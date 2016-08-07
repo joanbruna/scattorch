@@ -13,7 +13,7 @@ function scatt1d:__init(nInputPlane, scale)
    self.scale = scale
    self.pad = 0
 
-   self.info = torch.load('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_inplanes_1d_' .. nInputPlane .. '_scale_' .. scale .. '.th' )
+   self.info = torch.load('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_1d_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '.th' )
 
 	---------------
 	--main branch: scattering
@@ -25,7 +25,7 @@ function scatt1d:__init(nInputPlane, scale)
 	-- of this simplification 
    for i=1,self.scale do
       self.scatt:add(nn.TemporalConvolution(self.info.nstates[i], 2*self.info.nstates[i+1], self.info.width[i]))
-      self.scatt:add(nn.FeaturePooling(2,2))
+      self.scatt:add(nn.TemporalFeaturePooling(2,2))
       if i > 1 then
 	self.scatt:add(nn.scatt_1d_Downsampling(self.info.nstates[i+1]))
       end
@@ -64,7 +64,7 @@ function scatt1d:__init(nInputPlane, scale)
 	-- -----------
 	self.haar = nn.Sequential()
 	self.haar:add(nn.TemporalConvolution(self.info.nstates[1], 2*self.info.nstates[1], self.info.width[1]))
-	self.haar:add(nn.FeaturePooling(2,2))
+	self.haar:add(nn.TemporalFeaturePooling(2,2))
 	for i=2,self.scale do
 		self.haar:add(nn.TemporalConvolution(self.info.nstates[1], self.info.nstates[1], self.info.width[i]))
 		self.haar:add(nn.scatt_1d_Downsampling(self.info.nstates[1]))
@@ -96,9 +96,12 @@ function scatt1d:__init(nInputPlane, scale)
 	self.joint:add(self.lpass)
 	self.joint:add(self.haar)
 
+	--self.all = nn.Sequential()
+	--self.all:add(self.scatt)
+
 	self.all = nn.Sequential()
 	self.all:add(self.joint)
-	self.all:add(nn.JoinTable(1,3))
+	self.all:add(nn.JoinTable(2,2))
 
 end
 
