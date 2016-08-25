@@ -59,7 +59,8 @@ nstates(j+1) = (rast -1)/2;
 width(j) = size(filters.h,1);
 downs(j) = 1 + (j>1);
 %aux = reshape(W,2*nstates(j+1), nstates(j)*width(j)*width(j));
-eval(['weights',num2str(j),'=','permute(W,[2,1,3]);']);
+%eval(['weights',num2str(j),'=','permute(W,[2,1,3]);']);
+eval(['weights',num2str(j),'=','permute(W,[1,2,3]);']);
 current_order = new_order;
 clear W;
 end
@@ -74,7 +75,8 @@ else
 W(r, :, r) = filters.identity/l0;
 end
 end
-eval(['lpweights',num2str(j),'=','permute(W,[2,1,3]);']);
+%eval(['lpweights',num2str(j),'=','permute(W,[2,1,3]);']);
+eval(['lpweights',num2str(j),'=','permute(W,[1,2,3]);']);
 clear W;
 end
 
