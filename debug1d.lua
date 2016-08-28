@@ -4,9 +4,9 @@ require 'AMul.lua';
 require 'scatt_1d_Downsampling.lua';
 require 'scatt1d'
 
-bla = torch.rand(10,10000,1)
+bla = torch.rand(10,6144,1)
 
-scale = 9
+scale = 10
 nInputPlane = 1
 info = torch.load('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_1d_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '.th' )
 
@@ -36,6 +36,10 @@ info = torch.load('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_1d_inpl
 		haar:add(nn.scatt_1d_Downsampling(info.nstates[1]))
 	end
 
+
+	total = nn.Sequential()
+	total:add(nn.scatt1d(nInputPlane, scale))
+
 print(bla:size())
 bli = scatt:forward(bla)
 print(bli:size())
@@ -43,4 +47,7 @@ ble = lpass:forward(bla)
 print(ble:size())
 blo = haar:forward(bla)
 print(blo:size())
+blu = total:forward(bla)
+print(blu:size())
+
 

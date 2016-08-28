@@ -19,7 +19,7 @@ function scatt1d:__init(nInputPlane, scale)
 	--main branch: scattering
 	----------
    self.scatt = nn.Sequential()
-	local scalingfact = 2^(2*self.scale-1)
+	local scalingfact = 2^(self.scale-1)
 
 	-- attention: I am not doing any smoothing after the modulus. the filters are not exactly the same TODO check the impact 
 	-- of this simplification 
