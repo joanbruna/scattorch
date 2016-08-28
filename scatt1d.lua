@@ -34,14 +34,14 @@ function scatt1d:__init(nInputPlane, scale, path)
    --add normalization by a simple constant factor (TODO improve)
    self.scatt:add(nn.AMul(scalingfact))
 
-	print(self.scatt.modules[1].weight:size())
-	print(self.info.weights[1]:size())
+	--print(self.scatt.modules[1].weight:size())
+	--print(self.info.weights[1]:size())
 
-	self.scatt.modules[1].weight = self.info.weights[1]:clone()
+	self.scatt.modules[1].weight:copy(self.info.weights[1])
 	self.scatt.modules[1].bias:fill(0)
 
    for i=2,self.scale do
-      self.scatt.modules[3*(i-1)].weight = self.info.weights[i]:clone()
+      self.scatt.modules[3*(i-1)].weight:copy(self.info.weights[i])
       self.scatt.modules[3*(i-1)].bias:fill(0)
    end 
    
@@ -55,11 +55,13 @@ function scatt1d:__init(nInputPlane, scale, path)
 	self.lpass:add(nn.scatt_1d_Downsampling(self.info.nstates[1], pathf))
 	end
 	end
+
+
 	self.lpass:add(nn.AMul(scalingfact))
-	self.lpass.modules[1].weight = self.info.lpweights[1]:clone()
+	self.lpass.modules[1].weight:copy(self.info.lpweights[1])
 	self.lpass.modules[1].bias:fill(0)
   	for i=2,self.scale do
-	self.lpass.modules[2*(i-1)].weight = self.info.lpweights[i]:clone()
+	self.lpass.modules[2*(i-1)].weight:copy(self.info.lpweights[i])
 	self.lpass.modules[2*(i-1)].bias:fill(0)
 	end
 
@@ -85,10 +87,10 @@ function scatt1d:__init(nInputPlane, scale, path)
 		ker1[self.nInputPlane+i][zz*(i-1)+(zz-1)/2+1]=1
 		ker1[self.nInputPlane+i][zz*(i-1)+(zz-1)/2+2]=-1
 	end
-	self.haar.modules[1].weight = ker1:clone()
+	self.haar.modules[1].weight:copy(ker1)
 	self.haar.modules[1].bias:fill(0)
 	for i=2,self.scale do
-		self.haar.modules[2*i-1].weight = self.info.lpweights[i]:clone()
+		self.haar.modules[2*i-1].weight:copy(self.info.lpweights[i])
 		self.haar.modules[2*i-1].bias:fill(0)
 	end
 
@@ -100,12 +102,12 @@ function scatt1d:__init(nInputPlane, scale, path)
 	self.joint:add(self.lpass)
 	self.joint:add(self.haar)
 
-	self.all = nn.Sequential()
-	self.all:add(self.scatt)
-
 	--self.all = nn.Sequential()
-	--self.all:add(self.joint)
-	--self.all:add(nn.JoinTable(2,2))
+	--self.all:add(self.haar)
+
+	self.all = nn.Sequential()
+	self.all:add(self.joint)
+	self.all:add(nn.JoinTable(2,2))
 
 end
 
