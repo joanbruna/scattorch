@@ -1,14 +1,15 @@
 local scatt_1d_Downsampling, parent = torch.class('nn.scatt_1d_Downsampling', 'nn.Module')
 
-function scatt_1d_Downsampling:__init(nInputPlane)
+function scatt_1d_Downsampling:__init(nInputPlane, path)
    parent.__init(self)
    
    self.nInputPlane = nInputPlane
+   local pathf = path or '/misc/vlgscratch2/LecunGroup/bruna/scattorch/'
 
    self.padding = padding or 0
    self.scale = scale
 
-   self.info = torch.load('/misc/vlgscratch2/LecunGroup/bruna/scattorch/downsampling_1d_filter.th')
+   self.info = torch.load(pathf .. 'downsampling_1d_filter.th')
 
 	---------------
 	--main branch: scattering
