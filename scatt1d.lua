@@ -4,7 +4,7 @@
 
 local scatt1d, parent = torch.class('nn.scatt1d', 'nn.Module')
 
-function scatt1d:__init(nInputPlane, scale, path)
+function scatt1d:__init(nInputPlane, scale, order, path)
    parent.__init(self)
    
    self.nInputPlane = nInputPlane
@@ -13,8 +13,9 @@ function scatt1d:__init(nInputPlane, scale, path)
    self.padding = padding or 0
    self.scale = scale
    self.pad = 0
+   self.order = order or 2
 
-   self.info = torch.load(pathf .. 'wavelets_1d_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '.th' )
+   self.info = torch.load(pathf .. 'wavelets_1d_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '_maxorder_' .. order .. '.th' )
 
 	---------------
 	--main branch: scattering
