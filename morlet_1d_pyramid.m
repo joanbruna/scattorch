@@ -8,9 +8,9 @@ function filters = morlet_1d_pyramid(options)
 %xi1 = xi*3/4;% * 2 * sigma^2/sigma1^2
 
 N = getoptions(options,'length',9);
-Ndowns = getoptions(options,'lengthdowns',5);
-sigmap0 = getoptions(options,'sigmap0', 0.6);
-sigma0 = getoptions(options,'sigma0', 0.6);
+Ndowns = getoptions(options,'lengthdowns',9);
+sigmap0 = getoptions(options,'sigmap0', 0.25);
+sigma0 = getoptions(options,'sigma0', 0.25);
 sigmap = getoptions(options, 'sigmap',sqrt(2*sigmap0^2-sigma0^2) );
 sigma = getoptions(options, 'sigma', sqrt(1.0)*sigma0);
 xi = getoptions(options,'xi',2*pi/3);
@@ -40,11 +40,11 @@ filters.downfilters = gausswin(Ndowns, 1/sigma);
 
 
 %renormalize
-fact = getoptions(options,'renfact',sqrt(2));
+fact = getoptions(options,'renfact',sqrt(1));
 
 filters.h0 = filters.h0 * fact / sum(abs(filters.h0));
 filters.h = filters.h * fact / sum(abs(filters.h));
 filters.g0 = filters.g0 * fact / sum(abs(filters.g0));
 filters.g = filters.g * fact / sum(abs(filters.g));
-filters.downfilters = filters.downfilters * fact / sum(abs(filters.downfilters));
+filters.downfilters = filters.downfilters * sqrt(2) / sum(abs(filters.downfilters));
 
