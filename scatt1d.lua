@@ -33,7 +33,7 @@ function scatt1d:__init(nInputPlane, scale, order, path)
       end
    end
    --add normalization by a simple constant factor (TODO improve)
-   self.scatt:add(nn.AMul(scalingfact))
+   --self.scatt:add(nn.AMul(scalingfact))
 
 	--print(self.scatt.modules[1].weight:size())
 	--print(self.info.weights[1]:size())
@@ -58,7 +58,7 @@ function scatt1d:__init(nInputPlane, scale, order, path)
 	end
 
 
-	self.lpass:add(nn.AMul(scalingfact))
+	--self.lpass:add(nn.AMul(scalingfact))
 	self.lpass.modules[1].weight:copy(self.info.lpweights[1])
 	self.lpass.modules[1].bias:fill(0)
   	for i=2,self.scale do
@@ -76,7 +76,7 @@ function scatt1d:__init(nInputPlane, scale, order, path)
 		self.haar:add(nn.TemporalConvolution(self.info.nstates[1], self.info.nstates[1], self.info.width[i]))
 		self.haar:add(nn.scatt_1d_Downsampling(self.info.nstates[1], pathf))
 	end
-	self.haar:add(nn.AMul(scalingfact))
+	--self.haar:add(nn.AMul(scalingfact))
 
 	--define the haar filters implementing the TV
 	local zz = self.info.width[1]

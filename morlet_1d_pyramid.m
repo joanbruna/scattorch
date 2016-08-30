@@ -38,3 +38,13 @@ filters.g = oscilating_part - K.*filters.g;
 
 filters.downfilters = gausswin(Ndowns, 1/sigma);
 
+
+%renormalize
+fact = getoptions(options,'renfact',sqrt(2));
+
+filters.h0 = filters.h0 * fact / sum(abs(filters.h0));
+filters.h = filters.h * fact / sum(abs(filters.h));
+filters.g0 = filters.g0 * fact / sum(abs(filters.g0));
+filters.g = filters.g * fact / sum(abs(filters.g));
+filters.downfilters = filters.downfilters * fact / sum(abs(filters.downfilters));
+
