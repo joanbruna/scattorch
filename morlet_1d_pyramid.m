@@ -21,7 +21,7 @@ x = [1:N] - offset -1 ;
 x =x';
 
 filters.identity = zeros(N,1);
-filters.identity(ceil(size(filters.identity,1)/2))=1;
+filters.identity(ceil(size(filters.identity,1)/2))=1/sqrt(2);
 
 filters.h0 = gausswin(N, 1/sigma0);
 filters.h = gausswin(N, 1/sigma);
