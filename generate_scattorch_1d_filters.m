@@ -69,7 +69,7 @@ for r=1:nstates(1)
 if j==1
 W(r, :, r) = filters.h0/l0;
 else
-W(r, :, r) = filters.identity/l0;
+W(r, :, r) = sqrt(2)*filters.identity/l0;
 end
 end
 %eval(['lpweights',num2str(j),'=','permute(W,[2,1,3]);']);
