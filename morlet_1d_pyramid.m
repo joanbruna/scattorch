@@ -12,10 +12,10 @@ N = getoptions(options,'length',9*Q);
 Ndowns = getoptions(options,'lengthdowns',9);
 sigmap0 = getoptions(options,'sigmap0', 0.25*sqrt(Q));
 sigma0 = getoptions(options,'sigma0', 0.25);
-sigmap = getoptions(options, 'sigmap',0.25*sqrt(Q) );
+sigmap = getoptions(options, 'sigmap',0.25 );
 sigma = getoptions(options, 'sigma', sigma0);
-xi = getoptions(options,'xi',0.5*pi);
-xi0 = getoptions(options,'xi0',xi*3/4);
+xi = getoptions(options,'xi',2*pi/3);
+xi0 = getoptions(options,'xi0',0.5*pi);
 
 %xi = getoptions(options,'xi',2*pi/3);
 %xi0 = getoptions(options,'xi0',xi*3/4);
@@ -41,13 +41,12 @@ for q=1:Q
     oscilating_part = filters.g0{q} .* exp(1i*x*xi0*freqspan(q));
     K = sum(oscilating_part(:)) ./ sum(filters.g0{q}(:));
     filters.g0{q} = oscilating_part - K.*filters.g0{q};
-    
-    filters.g{q} = gausswin(N, (freqspan(q)/sigmap));
-    oscilating_part = filters.g{q} .* exp(1i*x*xi*freqspan(q));
-    K = sum(oscilating_part(:)) ./ sum(filters.g{q}(:));
-    filters.g{q} = oscilating_part - K.*filters.g{q};
+end    
 
-end
+    filters.g = gausswin(N, (1/sigmap));
+    oscilating_part = filters.g .* exp(1i*x*xi);
+    K = sum(oscilating_part(:)) ./ sum(filters.g(:));
+    filters.g = oscilating_part - K.*filters.g;
 
 filters.downfilters = gausswin(Ndowns, 1/sigma);
 
@@ -58,7 +57,8 @@ filters.h0 = filters.h0 * fact / sum(abs(filters.h0));
 filters.h = filters.h * fact / sum(abs(filters.h));
 for q=1:Q
 filters.g0{q} = filters.g0{q} * fact / sum(abs(filters.g0{q}));
-filters.g{q} = filters.g{q} * fact / sum(abs(filters.g{q}));
 end
+filters.g = filters.g * fact / sum(abs(filters.g));
+
 filters.downfilters = filters.downfilters * sqrt(2) / sum(abs(filters.downfilters));
 

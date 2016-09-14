@@ -4,7 +4,7 @@
 
 local scatt1d, parent = torch.class('nn.scatt1d', 'nn.Module')
 
-function scatt1d:__init(nInputPlane, scale, order, path)
+function scatt1d:__init(nInputPlane, scale, order, Q, path)
    parent.__init(self)
    
    self.nInputPlane = nInputPlane
@@ -14,8 +14,13 @@ function scatt1d:__init(nInputPlane, scale, order, path)
    self.scale = scale
    self.pad = 0
    self.order = order or 2
+   self.Q = Q or 1
 
-   self.info = torch.load(pathf .. 'wavelets_1d_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '_maxorder_' .. order .. '.th' )
+	if Q == 0 then
+   self.info = torch.load(pathf .. 'wavelets_1d_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '_maxorder_' .. self.order .. '.th' )
+	else
+   self.info = torch.load(pathf .. 'wavelets_1d_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '_maxorder_' .. self.order .. '_Q' .. self.Q .. '.th' )
+	end
 
 	---------------
 	--main branch: scattering
