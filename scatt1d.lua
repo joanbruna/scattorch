@@ -100,7 +100,7 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 
 	self.all = nn.Sequential()
 	self.all:add(self.joint)
-	self.all:add(nn.JoinTable(2,2))
+	self.all:add(nn.JoinTable(1,3))
 
 end
 
