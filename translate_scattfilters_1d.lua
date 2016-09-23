@@ -23,8 +23,6 @@ lpweights={}
 --print(data.weights1:size())
 
 local ninputchannels = data.weights1:size(2)
-print(ninputchannels)
-
 
 if scales>0 then
 	weights[1] = data.weights1:view(data.weights1:size(1),data.weights1:size(2)*data.weights1:size(3)*data.weights1:size(4))
@@ -80,4 +78,14 @@ end
 nstates[scales+1]=data.nstates[scales+1][1]
 
 torch.save(opt.output, {weights=weights, lpweights=lpweights, downs=downs, nstates=nstates, width=width } )
+
+
+-- translate downfilters too
+ddata = mattorch.load('/misc/vlgscratch2/LecunGroup/bruna/scattorch/downsampling_1d_filter.mat')
+width = ddata.downfilters:nElement()
+weights = ddata.downfilters:clone()
+torch.save('/misc/vlgscratch2/LecunGroup/bruna/scattorch/downsampling_1d_filter.th', {weights=weights, width=width})
+
+
+
 
