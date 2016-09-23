@@ -36,23 +36,31 @@ rast=1;
 for r=1:nstates(j)
 	if current_order(r) < options.maxorder
 		if current_order(r) ==0
+		if j==1 
 		for q=1:options.Q
-		  W(r,:,rast) = real(filters.g0{q});rast=rast+1; %we are doing something slightly wrong here (recycling filters) TODO update
-		  W(r,:,rast) = imag(filters.g0{q});
+		  W(r,:,1,rast) = real(filters.g0{q});rast=rast+1; 
+		  W(r,:,1,rast) = imag(filters.g0{q});
 		  new_order(round(rast/2)) = current_order(r)+1;rast=rast+1;
 		end
 		else
-		  W(r,:,rast) = real(filters.g);rast=rast+1;
-		  W(r,:,rast) = imag(filters.g);
+		for q=1:options.Q
+		  W(r,:,1,rast) = real(filters.g1{q});rast=rast+1; 
+		  W(r,:,1,rast) = imag(filters.g1{q});
+		  new_order(round(rast/2)) = current_order(r)+1;rast=rast+1;
+		end
+		end
+		else
+		  W(r,:,1,rast) = real(filters.g);rast=rast+1;
+		  W(r,:,1,rast) = imag(filters.g);
 		  new_order(round(rast/2)) = current_order(r)+1;rast=rast+1;
 		end
 	end
 	if j==1
-	W(r,:,rast) = filters.h0/lpatten; rast=rast+1;
-	W(r,:,rast) = filters.h0/lpatten; 
+	W(r,:,1,rast) = filters.h0/lpatten; rast=rast+1;
+	W(r,:,1,rast) = filters.h0/lpatten; 
 	else
-	W(r,:,rast) = filters.identity/lpatten; rast=rast+1;
-	W(r,:,rast) = filters.identity/lpatten; 
+	W(r,:,1,rast) = filters.identity/lpatten; rast=rast+1;
+	W(r,:,1,rast) = filters.identity/lpatten; 
 	end
 	new_order(round(rast/2)) = current_order(r);rast=rast+1;
 end
@@ -60,8 +68,7 @@ nstates(j+1) = (rast -1)/2;
 width(j) = size(filters.h,1);
 downs(j) = 1 + (j>1);
 %aux = reshape(W,2*nstates(j+1), nstates(j)*width(j)*width(j));
-%eval(['weights',num2str(j),'=','permute(W,[2,1,3]);']);
-eval(['weights',num2str(j),'=','permute(W,[1,2,3]);']);
+eval(['weights',num2str(j),'=','permute(W,[2,3,1,4]);']);
 current_order = new_order;
 clear W;
 end
@@ -71,13 +78,13 @@ for j=1:options.J
 rast=1;
 for r=1:nstates(1)
 if j==1
-W(r, :, r) = filters.h0/l0;
+W(r, :, 1, r) = filters.h0/l0;
 else
-W(r, :, r) = sqrt(2)*filters.identity/l0;
+W(r, :, 1, r) = sqrt(2)*filters.identity/l0;
 end
 end
 %eval(['lpweights',num2str(j),'=','permute(W,[2,1,3]);']);
-eval(['lpweights',num2str(j),'=','permute(W,[1,2,3]);']);
+eval(['lpweights',num2str(j),'=','permute(W,[2,3,1,4]);']);
 clear W;
 end
 

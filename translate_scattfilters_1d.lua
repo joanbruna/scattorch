@@ -23,37 +23,38 @@ lpweights={}
 --print(data.weights1:size())
 
 local ninputchannels = data.weights1:size(2)
+print(ninputchannels)
 
 
 if scales>0 then
-	weights[1] = data.weights1:view(data.weights1:size(1),data.weights1:size(2)*data.weights1:size(3))
+	weights[1] = data.weights1:view(data.weights1:size(1),data.weights1:size(2)*data.weights1:size(3)*data.weights1:size(4))
 	lpweights[1] = data.lpweights1:view(ninputchannels,-1)
 if scales>1 then
-	weights[2] = data.weights2:view(data.weights2:size(1),data.weights2:size(2)*data.weights2:size(3))
+	weights[2] = data.weights2:view(data.weights2:size(1),data.weights2:size(2)*data.weights2:size(3)*data.weights2:size(4))
 	lpweights[2] = data.lpweights2:view(ninputchannels,-1)
 if scales>2 then
-	weights[3] = data.weights3:view(data.weights3:size(1),data.weights3:size(2)*data.weights3:size(3))
+	weights[3] = data.weights3:view(data.weights3:size(1),data.weights3:size(2)*data.weights3:size(3)*data.weights3:size(4))
 	lpweights[3] = data.lpweights3:view(ninputchannels,-1)
 if scales>3 then
-	weights[4] = data.weights4:view(data.weights4:size(1),data.weights4:size(2)*data.weights4:size(3))
+	weights[4] = data.weights4:view(data.weights4:size(1),data.weights4:size(2)*data.weights4:size(3)*data.weights4:size(4))
 	lpweights[4] = data.lpweights4:view(ninputchannels,-1)
 if scales>4 then
-	weights[5] = data.weights5:view(data.weights5:size(1),data.weights5:size(2)*data.weights5:size(3))
+	weights[5] = data.weights5:view(data.weights5:size(1),data.weights5:size(2)*data.weights5:size(3)*data.weights5:size(4))
 	lpweights[5] = data.lpweights5:view(ninputchannels,-1)
 if scales>5 then
-	weights[6] = data.weights6:view(data.weights6:size(1),data.weights6:size(2)*data.weights6:size(3))
+	weights[6] = data.weights6:view(data.weights6:size(1),data.weights6:size(2)*data.weights6:size(3)*data.weights6:size(4))
 	lpweights[6] = data.lpweights6:view(ninputchannels,-1)
 if scales>6 then
-	weights[7] = data.weights7:view(data.weights7:size(1),data.weights7:size(2)*data.weights7:size(3))
+	weights[7] = data.weights7:view(data.weights7:size(1),data.weights7:size(2)*data.weights7:size(3)*data.weights7:size(4))
 	lpweights[7] = data.lpweights7:view(ninputchannels,-1)
 if scales>7 then
-	weights[8] = data.weights8:view(data.weights8:size(1),data.weights8:size(2)*data.weights8:size(3))
+	weights[8] = data.weights8:view(data.weights8:size(1),data.weights8:size(2)*data.weights8:size(3)*data.weights8:size(4))
 	lpweights[8] = data.lpweights8:view(ninputchannels,-1)
 if scales>8 then
-	weights[9] = data.weights9:view(data.weights9:size(1),data.weights9:size(2)*data.weights9:size(3))
+	weights[9] = data.weights9:view(data.weights9:size(1),data.weights9:size(2)*data.weights9:size(3)*data.weights9:size(4))
 	lpweights[9] = data.lpweights9:view(ninputchannels,-1)
 if scales>9 then
-	weights[10] = data.weights10:view(data.weights10:size(1),data.weights10:size(2)*data.weights10:size(3))
+	weights[10] = data.weights10:view(data.weights10:size(1),data.weights10:size(2)*data.weights10:size(3)*data.weights10:size(4))
 	lpweights[10] = data.lpweights10:view(ninputchannels,-1)
 
 end
