@@ -26,7 +26,7 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	local scalingfact = 2^(self.scale-1)
 
 	for i=1,self.scale do
-		self.scatt:add(nn.SpatialConvolutionMM(self.info.nstates[i], 2*self.info.nstates[i+1], self.info.width[i], 1))
+		self.scatt:add(nn.SpatialConvolutionMM(self.info.nstates[i], 2*self.info.nstates[i+1], self.info.width[i], 1, 1, 1, (self.info.width[i]-1)/2,0))
 		self.scatt:add(nn.FeaturePooling(2,2))
 		if i > 1 then
 			self.scatt:add(nn.scatt_1d_Downsampling(self.info.nstates[i+1], pathf))
@@ -46,7 +46,7 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	-- ---------------
 	self.lpass = nn.Sequential()
 	for i=1,self.scale do
-		self.lpass:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i],1))
+		self.lpass:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i],1,1, 1, (self.info.width[i]-1)/2,0))
 		if i >1 then
 		self.lpass:add(nn.scatt_1d_Downsampling(self.info.nstates[1], pathf))
 		end
@@ -63,10 +63,10 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	-- add the TV branch (finest Haar scale)
 	-- -----------
 	self.haar = nn.Sequential()
-	self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], 2*self.info.nstates[1], self.info.width[1],1))
+	self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], 2*self.info.nstates[1], self.info.width[1],1,1,1,(self.info.width[1]-1)/2,0))
 	self.haar:add(nn.FeaturePooling(2,2))
 	for i=2,self.scale do
-		self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i],1))
+		self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i],1,1,1,(self.info.width[i]-1)/2,0))
 		self.haar:add(nn.scatt_1d_Downsampling(self.info.nstates[1], pathf))
 	end
 
@@ -74,11 +74,12 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	local zz = self.info.width[1]
 	local ker1 = torch.Tensor(2*self.nInputPlane, zz*self.info.nstates[1]):zero()
 
+	local facti = 1
 	for i=1,self.info.nstates[1] do
-		ker1[i][zz*(i-1)+(zz-1)/2+1]=1/2
-		ker1[i][zz*(i-1)+(zz-1)/2+2]=-1/2
-		ker1[self.nInputPlane+i][zz*(i-1)+(zz-1)/2+1]=1/2
-		ker1[self.nInputPlane+i][zz*(i-1)+(zz-1)/2+2]=-1/2
+		ker1[i][zz*(i-1)+(zz-1)/2+1]=facti
+		ker1[i][zz*(i-1)+(zz-1)/2+2]=-facti
+		ker1[self.nInputPlane+i][zz*(i-1)+(zz-1)/2+1]=facti
+		ker1[self.nInputPlane+i][zz*(i-1)+(zz-1)/2+2]=-facti
 	end
 	self.haar.modules[1].weight:copy(ker1)
 	self.haar.modules[1].bias:fill(0)
@@ -92,7 +93,7 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	-----------------------
 	self.joint = nn.ConcatTable()
 	self.joint:add(self.scatt)
-	self.joint:add(self.lpass)
+	--self.joint:add(self.lpass)
 	self.joint:add(self.haar)
 
 	--self.all = nn.Sequential()

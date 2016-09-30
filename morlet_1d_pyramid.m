@@ -8,17 +8,20 @@ function filters = morlet_1d_pyramid(options)
 %xi1 = xi*3/4;% * 2 * sigma^2/sigma1^2
 
 Q = getoptions(options,'Q',1);
-N = getoptions(options,'length',9*Q);
+N = getoptions(options,'length',13*Q);
 Ndowns = getoptions(options,'lengthdowns',9);
-sigmap0 = getoptions(options,'sigmap0', 0.15*sqrt(Q));
+
+sigmap0 = getoptions(options,'sigmap0', 0.25*(Q));
 sigma0 = getoptions(options,'sigma0', 0.15);
-sigmap1 = getoptions(options,'sigmap1', 0.2*sqrt(Q));
-sigma1 = getoptions(options,'sigma1', 0.2);
+sigmap1 = getoptions(options,'sigmap1', 0.25*(Q));
+sigma1 = getoptions(options,'sigma1', 0.25);
 sigmap = getoptions(options, 'sigmap',0.25 );
 sigma = getoptions(options, 'sigma', 0.25);
+
 xi = getoptions(options,'xi',2*pi/3);
-xi0 = getoptions(options,'xi0',0.5*pi);
-xi1 = getoptions(options,'xi0',0.5*pi);
+xi0 = getoptions(options,'xi0',0.4*pi);
+xi1 = getoptions(options,'xi1',0.4*pi);
+
 
 %xi = getoptions(options,'xi',2*pi/3);
 %xi0 = getoptions(options,'xi0',xi*3/4);

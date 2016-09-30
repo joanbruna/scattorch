@@ -15,7 +15,7 @@ function scatt_1d_Downsampling:__init(nInputPlane, path)
 	--main branch: scattering
 	----------
    self.downs = nn.Sequential()
-   self.downs:add(nn.SpatialConvolutionMM(nInputPlane, nInputPlane, self.info.width, 1, 2,1 ));
+   self.downs:add(nn.SpatialConvolutionMM(nInputPlane, nInputPlane, self.info.width, 1, 2,1 ,(self.info.width-1)/2,0));
 	local zz = self.info.width;
   	local ker = torch.Tensor(self.nInputPlane, zz*self.nInputPlane):zero()
 
