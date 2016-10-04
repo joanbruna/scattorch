@@ -58,7 +58,7 @@ for r=1:nstates(j)
 	if j==1
 	W(r,:,1,rast) = filters.h0/lpatten; rast=rast+1;
 	W(r,:,1,rast) = filters.h0/lpatten; 
-	else
+	elseif j<options.J
 	W(r,:,1,rast) = filters.identity/lpatten; rast=rast+1;
 	W(r,:,1,rast) = filters.identity/lpatten; 
 	end
