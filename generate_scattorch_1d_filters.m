@@ -38,8 +38,8 @@ for r=1:nstates(j)
 		if current_order(r) ==0
 		if j==1 
 		for q=1:options.Q
-		  W(r,:,1,rast) = real(filters.g0{q});rast=rast+1; 
-		  W(r,:,1,rast) = imag(filters.g0{q});
+		  W(r,:,1,rast) = .25*real(filters.g0{q});rast=rast+1; 
+		  W(r,:,1,rast) = .25*imag(filters.g0{q});
 		  new_order(round(rast/2)) = current_order(r)+1;rast=rast+1;
 		end
 		else
@@ -56,8 +56,8 @@ for r=1:nstates(j)
 		end
 	end
 	if j==1
-	W(r,:,1,rast) = filters.h0/lpatten; rast=rast+1;
-	W(r,:,1,rast) = filters.h0/lpatten; 
+	W(r,:,1,rast) = filters.h0/(2*lpatten); rast=rast+1;
+	W(r,:,1,rast) = filters.h0/(2*lpatten); 
 	else
 	W(r,:,1,rast) = filters.identity/lpatten; rast=rast+1;
 	W(r,:,1,rast) = filters.identity/lpatten; 
