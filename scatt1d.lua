@@ -26,7 +26,7 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	local scalingfact = 2^(self.scale-1)
 
 	for i=1,self.scale do
-		self.scatt:add(nn.SpatialConvolutionMM(self.info.nstates[i], 2*self.info.nstates[i+1], self.info.width[i], 1, 1, 1, (self.info.width[i]-1)/2,0))
+		self.scatt:add(nn.SpatialConvolutionMM(self.info.nstates[i], 2*self.info.nstates[i+1], self.info.width[i], 1, 1, 1, self.pad*(self.info.width[i]-1)/2,0))
 		self.scatt:add(nn.FeaturePooling(2,2))
 		if i > 1 then
 			self.scatt:add(nn.scatt_1d_Downsampling(self.info.nstates[i+1], pathf))
@@ -46,7 +46,7 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	-- ---------------
 	self.lpass = nn.Sequential()
 	for i=1,self.scale do
-		self.lpass:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i],1,1, 1, (self.info.width[i]-1)/2,0))
+		self.lpass:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i],1,1, 1, self.pad*(self.info.width[i]-1)/2,0))
 		if i >1 then
 		self.lpass:add(nn.scatt_1d_Downsampling(self.info.nstates[1], pathf))
 		end
@@ -63,10 +63,10 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	-- add the TV branch (finest Haar scale)
 	-- -----------
 	self.haar = nn.Sequential()
-	self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], 2*self.info.nstates[1], self.info.width[1],1,1,1,(self.info.width[1]-1)/2,0))
+	self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], 2*self.info.nstates[1], self.info.width[1],1,1,1,self.pad*(self.info.width[1]-1)/2,0))
 	self.haar:add(nn.FeaturePooling(2,2))
 	for i=2,self.scale do
-		self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i],1,1,1,(self.info.width[i]-1)/2,0))
+		self.haar:add(nn.SpatialConvolutionMM(self.info.nstates[1], self.info.nstates[1], self.info.width[i],1,1,1,self.pad*(self.info.width[i]-1)/2,0))
 		self.haar:add(nn.scatt_1d_Downsampling(self.info.nstates[1], pathf))
 	end
 
@@ -92,9 +92,9 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	--join everything together
 	-----------------------
 	self.joint = nn.ConcatTable()
-	self.joint:add(self.scatt)
-	--self.joint:add(self.lpass)
+	self.joint:add(self.lpass)
 	self.joint:add(self.haar)
+	self.joint:add(self.scatt)
 
 	--self.all = nn.Sequential()
 	--self.all:add(self.scatt)
@@ -106,12 +106,46 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 end
 
 function scatt1d:updateOutput(input)
+	--remove min so that input is positive
+	--local inmin = input:min()
+	--input:add(-inmin)
+
 	self.output = self.all:updateOutput(input)
+
+	--add min back to lowpass
+	--self.output:narrow(2,1,1):add(inmin)
+
+	--remove last dimension (rubbish)
+	local ndim = input:size():size()
+	if ndim == 4 then
+	self.output = self.output:narrow(2,1,self.output:size(2)-1)
+	else
+	self.output = self.output:narrow(1,1,self.output:size(1)-1)
+	end
+
+	--input:add(inmin)
 	return self.output
 end
 
 function scatt1d:updateGradInput(input, gradOutput)
-	self.gradInput = self.all:updateGradInput(input, gradOutput)
+
+	--remove min so that input is positive
+	--local inmin = input:min()
+	--input:add(-inmin)
+	local ndim = input:size():size()
+	if ndim == 4 then
+		gradtmp = torch.Tensor(gradOutput:size(1), gradOutput:size(2)+1, gradOutput:size(3), gradOutput:size(4)):zero()
+		gradtmp:narrow(2,1,gradOutput:size(2)):copy(gradOutput)
+	else
+		gradtmp = torch.Tensor(gradOutput:size(1)+1, gradOutput:size(2), gradOutput:size(3)):zero()
+		gradtmp:narrow(1,1,gradOutput:size(1)):copy(gradOutput)
+	end
+	--self.gradInput = self.all:updateGradInput(input, gradOutput)
+	self.gradInput = self.all:updateGradInput(input, gradtmp:double())
+
+	--self.gradInput:narrow(2,1,1):add(inmin)
+	--input:add(inmin)
+
 	return self.gradInput
 end
 
