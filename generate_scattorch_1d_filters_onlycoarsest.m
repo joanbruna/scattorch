@@ -1,4 +1,4 @@
-function  generate_scattorch_1d_filters(inplanes, scale, maxorder, Q)
+function  generate_scattorch_1d_filters_onlycoarsest(inplanes, scale, maxorder, Q)
 
 %in this script we generate the conjugate mirror filters to run on torch
 options.maxorder=maxorder;
@@ -34,7 +34,8 @@ for j=1:options.J
 
 rast=1;
 for r=1:nstates(j)
-	if current_order(r) < options.maxorder
+	%if j == options.J & current_order(r) < options.maxorder
+	if (j == options.J & current_order(r) == options.maxorder -1) | (current_order(r) < options.maxorder-1)
 		if current_order(r) ==0
 		if j==1 
 		for q=1:options.Q
@@ -55,6 +56,7 @@ for r=1:nstates(j)
 		  new_order(round(rast/2)) = current_order(r)+1;rast=rast+1;
 		end
 	end
+	%if (j < options.J - 1) | (( j == options.J -1) & current_order(r) == options.maxorder -1) 
 	if j==1
 	W(r,:,1,rast) = filters.h0/(2*lpatten); rast=rast+1;
 	W(r,:,1,rast) = filters.h0/(2*lpatten); 
@@ -62,9 +64,10 @@ for r=1:nstates(j)
 	W(r,:,1,rast) = filters.identity/lpatten; rast=rast+1;
 	W(r,:,1,rast) = filters.identity/lpatten; 
 	end
+	%end
 	new_order(round(rast/2)) = current_order(r);rast=rast+1;
 end
-nstates(j+1) = (rast -1)/2;
+nstates(j+1) = floor((rast -1)/2);
 width(j) = size(filters.h,1);
 downs(j) = 1 + (j>1);
 %aux = reshape(W,2*nstates(j+1), nstates(j)*width(j)*width(j));
@@ -96,8 +99,8 @@ save('/misc/vlgscratch2/LecunGroup/bruna/scattorch/downsampling_1d_filter.mat','
    %self.info = torch.load('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '.th' )
 %matfile = sprintf('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_1d_inplanes_%d_scale_%d.mat',inplanes, scale);
 %torchfile = sprintf('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_1d_inplanes_%d_scale_%d.th',inplanes, scale);
-matfile = sprintf('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_1d_inplanes_%d_scale_%d_maxorder_%d_Q%d.mat',inplanes, scale, options.maxorder, options.Q);
-torchfile = sprintf('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_1d_inplanes_%d_scale_%d_maxorder_%d_Q%d.th',inplanes, scale, options.maxorder, options.Q);
+matfile = sprintf('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_1d_inplanes_%d_scale_%d_maxorder_%d_Q%d_oc.mat',inplanes, scale, options.maxorder, options.Q);
+torchfile = sprintf('/misc/vlgscratch2/LecunGroup/bruna/scattorch/wavelets_1d_inplanes_%d_scale_%d_maxorder_%d_Q%d_oc.th',inplanes, scale, options.maxorder, options.Q);
 
 if scale==10
 save(matfile,'lpweights1','lpweights2', 'lpweights3','lpweights4','lpweights5', 'lpweights6', 'lpweights7','lpweights8', 'lpweights9', 'lpweights10','weights1','weights2', 'weights3','weights4','weights5', 'weights6', 'weights7','weights8', 'weights9', 'weights10','nstates','width','downs','-v7.3');

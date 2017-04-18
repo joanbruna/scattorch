@@ -1,6 +1,6 @@
 local scatt1d, parent = torch.class('nn.scatt1d', 'nn.Module')
 
-function scatt1d:__init(nInputPlane, scale, order, Q, path)
+function scatt1d:__init(nInputPlane, scale, order, Q, path, oc)
 
 	parent.__init(self)
 
@@ -12,18 +12,27 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	self.pad = 0
 	self.order = order or 2
 	self.Q = Q or 1
+	self.oc = oc or 0
 
 	if Q == 0 then
 		self.info = torch.load(pathf .. 'wavelets_1d_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '_maxorder_' .. self.order .. '.th' )
 	else
+		if self.oc > 0 then
+		self.info = torch.load(pathf .. 'wavelets_1d_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '_maxorder_' .. self.order .. '_Q' .. self.Q .. '_oc.th' )
+		else
 		self.info = torch.load(pathf .. 'wavelets_1d_inplanes_' .. nInputPlane .. '_scale_' .. scale .. '_maxorder_' .. self.order .. '_Q' .. self.Q .. '.th' )
+		end
 	end
 
 	---------------
 	--main branch: scattering
 	----------
 	self.scatt = nn.Sequential()
-	local scalingfact = 2^(self.scale-1)
+	if self.oc > 0 then
+	scalingfact = 1 -- 2^(2*self.scale-1)
+	else
+	scalingfact = 2^(self.scale-1)
+	end
 
 	for i=1,self.scale do
 		self.scatt:add(nn.SpatialConvolutionMM(self.info.nstates[i], 2*self.info.nstates[i+1], self.info.width[i], 1, 1, 1, self.pad*(self.info.width[i]-1)/2,0))
@@ -33,10 +42,16 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 		end
 	end
 
+	--print(self.scale)
+	--print(self.order)
+	--print(self.info.nstates)
 	self.scatt.modules[1].weight:copy(self.info.weights[1])
 	self.scatt.modules[1].bias:fill(0)
 
 	for i=2,self.scale do
+	
+	--print(self.info.weights[i]:size())
+	--print(self.scatt.modules[3*(i-1)].weight:size())
 	self.scatt.modules[3*(i-1)].weight:copy(self.info.weights[i])
 	self.scatt.modules[3*(i-1)].bias:fill(0)
 	end 
@@ -92,7 +107,7 @@ function scatt1d:__init(nInputPlane, scale, order, Q, path)
 	--join everything together
 	-----------------------
 	self.joint = nn.ConcatTable()
-	self.joint:add(self.lpass)
+	--self.joint:add(self.lpass)
 	self.joint:add(self.haar)
 	self.joint:add(self.scatt)
 
