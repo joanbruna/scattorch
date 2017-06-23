@@ -2,7 +2,7 @@ function filters=generate_scatt_filters_pyramid(options)
 
 L = getoptions(options,'L',8);
 
-sigma=.8;%2/sqrt(3); 
+sigma=1;%2/sqrt(3); 
 sigma0=.8;%2*sigma/3;
 sigma1 = sqrt(2*sigma^2-sigma0^2);
 sigma2 = sqrt(1.5)*sigma0;
